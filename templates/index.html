@@ -6,63 +6,84 @@
     <title>Kriptoloji ve Bilgi Güvenliği Projesi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f7f6; }
-        .card { border-radius: 15px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header-section { background: #2c3e50; color: white; padding: 30px; border-radius: 15px 15px 0 0; }
-        .result-box { background-color: #ffffff; border-left: 5px solid #27ae60; padding: 15px; margin-top: 20px; }
-        .label-custom { font-weight: bold; color: #34495e; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header-section { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 40px; border-radius: 15px 15px 0 0; }
+        .result-box { background-color: #ffffff; border-left: 5px solid #28a745; padding: 20px; margin-top: 25px; border-radius: 0 10px 10px 0; }
+        .label-custom { font-weight: 600; color: #2c3e50; }
+        .btn-primary { background-color: #1e3c72; border: none; padding: 12px; font-weight: bold; }
+        .btn-primary:hover { background-color: #2a5298; }
+        code { word-wrap: break-word; white-space: pre-wrap; color: #d63384; }
     </style>
 </head>
 <body>
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-9 col-lg-7">
             <div class="card">
                 <div class="header-section text-center">
-                    <h2>🔐 Kriptoloji Projesi</h2>
-                    <p>AES - DES - RSA & Manuel S-DES Haberleşmesi</p>
+                    <h2 class="display-6">🔐 Güvenli Haberleşme</h2>
+                    <p class="lead mb-0">Bilgi Güvenliği ve Kriptoloji Dersi Uygulaması</p>
                 </div>
                 
                 <div class="card-body p-4">
                     <form action="/send" method="POST">
                         <div class="mb-4">
-                            <label for="message" class="label-custom mb-2">Gönderilecek Mesaj:</label>
-                            <textarea class="form-control" name="message" id="message" rows="3" placeholder="Şifrelemek istediğiniz metni buraya yazın..." required></textarea>
+                            <label for="message" class="label-custom mb-2">Şifrelenecek Mesaj:</label>
+                            <textarea class="form-control" name="message" id="message" rows="3" 
+                                      placeholder="Mesajınızı buraya girin..." required></textarea>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="label-custom mb-2">Şifreleme Algoritması:</label>
+                        <div class="mb-3">
+                            <label class="label-custom mb-2">Şifreleme Algoritması Seçin:</label>
                             <select class="form-select form-select-lg" name="algo">
-                                <option value="AES">AES-128 (Kütüphaneli)</option>
-                                <option value="DES">DES (Kütüphaneli)</option>
-                                <option value="SDES">Manuel S-DES (Kütüphanesiz)</option>
-                                <option value="RSA">RSA (Asimetrik / Anahtar Dağıtımı)</option>
+                                <option value="AES">AES-128 (Simetrik / Kütüphaneli)</option>
+                                <option value="DES">DES (Simetrik / Kütüphaneli)</option>
+                                <option value="SDES">Manuel S-DES (Bit Seviyesinde / Kütüphanesiz)</option>
+                                <option value="RSA">RSA (Asimetrik / Kütüphaneli)</option>
                             </select>
                         </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Şifrele ve Sunucuya Gönder</button>
+                        <div class="alert alert-info py-2" style="font-size: 0.85rem; border-left: 4px solid #0dcaf0;">
+                            <strong>💡 Bilgi:</strong> AES ve DES simetrik algoritmalardır (hızlı ve verimli), 
+                            RSA ise asimetriktir ve genellikle güvenli anahtar değişimi veya dijital imza için kullanılır.
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Şifrele ve Veriyi Gönder</button>
                         </div>
                     </form>
 
                     {% if result %}
-                    <div class="result-box mt-5 animated fadeIn">
-                        <h4 class="text-success">✅ İşlem Başarılı</h4>
+                    <div class="result-box shadow-sm animated fadeIn">
+                        <h4 class="text-success mb-3">✅ İşlem Detayları</h4>
                         <hr>
-                        <p><strong>Kullanılan Algoritma:</strong> <span class="badge bg-secondary">{{ result.algo }}</span></p>
-                        <p><strong>Orijinal Mesaj:</strong> {{ result.original }}</p>
-                        <p class="text-break"><strong>Şifrelenmiş Metin (Hex/Binary):</strong> <br>
-                           <code style="color: #e74c3c;">{{ result.encrypted }}</code>
-                        </p>
-                        <p><strong>Sunucuda Çözülen Mesaj:</strong> <span class="text-primary">{{ result.decrypted }}</span></p>
+                        <div class="mb-2">
+                            <strong>Kullanılan Yöntem:</strong> 
+                            <span class="badge bg-dark px-3">{{ result.algo }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Orijinal Mesaj:</strong> 
+                            <span class="text-muted italic">"{{ result.original }}"</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Şifrelenmiş Veri (Hex/Binary):</strong><br>
+                            <div class="p-2 bg-light border rounded mt-1">
+                                <code>{{ result.encrypted }}</code>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <strong>Sunucuda Çözülen Mesaj:</strong><br>
+                            <span class="h5 text-primary">{{ result.decrypted }}</span>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
             
             <div class="text-center mt-4 text-muted">
-                <small>Bilgi Güvenliği ve Kriptoloji Dersi Ödevi - 2024</small>
+                <small>© 2025 Kriptoloji Proje Ödevi | [Adınız Soyadınız]</small>
             </div>
         </div>
     </div>
