@@ -3,10 +3,11 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Util.Padding import pad, unpad
 
+
 def aes_encrypt(data, key):
     cipher = AES.new(key, AES.MODE_CBC)
     ct_bytes = cipher.encrypt(pad(data.encode(), AES.block_size))
-    return cipher.iv + ct_bytes
+    return cipher.iv + ct_bytes 
 
 def aes_decrypt(combined_data, key):
     iv = combined_data[:16]
