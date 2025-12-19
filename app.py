@@ -2,27 +2,32 @@ import os
 import sys
 from flask import Flask, render_template, request
 
-# --- HATA ENGELLEYİCİ: Dosya yolunu Python'a zorla tanıtıyoruz ---
+# --- IMPORT HATA ÇÖZÜCÜ ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 try:
-    from crypto_utils import aes_encrypt, aes_decrypt, generate_rsa_keys
+    from crypto_utils import (
+        aes_encrypt, aes_decrypt, 
+        generate_rsa_keys, 
+        caesar_encrypt, caesar_decrypt,
+        vigenere_encrypt, vigenere_decrypt
+    )
     from manual_sdes import encrypt_text as sdes_encrypt_manual
-    print(">>> MODÜLLER BAŞARIYLA YÜKLENDİ")
+    print(">>> [BAŞARILI] Tüm kripto modülleri yüklendi.")
 except ImportError as e:
-    print(f">>> KRİTİK HATA: Modüller yüklenemedi! Hata detayı: {e}")
+    print(f">>> [HATA] Modül yükleme hatası: {e}")
 
 from Crypto.Cipher import DES, PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Util.Padding import pad, unpad
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(current_dir, 'templates'))
 
-# --- ANAHTARLAR (ÖDEV GEREKSİNİMLERİ) ---
-AES_KEY = b'16byte_uzun_key!' # 16 byte
-DES_KEY = b'8byt_key'          # 8 byte
+# --- ANAHTARLAR ---
+AES_KEY = b'16byte_uzun_key!' # 128-bit
+DES_KEY = b'8byt_key'          # 64-bit
 
 # RSA Hazırlığı
 PRIVATE_KEY_PEM, PUBLIC_KEY_PEM = generate_rsa_keys()
@@ -41,27 +46,41 @@ def send():
     decrypted = ""
 
     try:
-        if algo == "AES":
+        # 1. CAESAR (Klasik)
+        if algo == "CAESAR":
+            shift = 3
+            encrypted = caesar_encrypt(msg, shift)
+            decrypted = caesar_decrypt(encrypted, shift)
+
+        # 2. VIGENERE (Polialfabetik)
+        elif algo == "VIGENERE":
+            v_key = "KRIPTO" # Deftere not et: Vigenere anahtarı
+            encrypted = vigenere_encrypt(msg, v_key)
+            decrypted = vigenere_decrypt(encrypted, v_key)
+
+        # 3. AES (Modern Simetrik)
+        elif algo == "AES":
             enc_bytes = aes_encrypt(msg, AES_KEY)
             encrypted = enc_bytes.hex()
             decrypted = aes_decrypt(enc_bytes, AES_KEY)
 
+        # 4. DES (Standart Simetrik)
         elif algo == "DES":
             cipher = DES.new(DES_KEY, DES.MODE_ECB)
             enc_bytes = cipher.encrypt(pad(msg.encode(), DES.block_size))
             encrypted = enc_bytes.hex()
             decrypted = unpad(cipher.decrypt(enc_bytes), DES.block_size).decode()
 
+        # 5. SDES (Manuel Uygulama)
         elif algo == "SDES":
-            # Manuel S-DES Fonksiyonu
             encrypted = sdes_encrypt_manual(msg)
-            decrypted = "[MANUEL MOD: Şifreleme Tamamlandı]"
+            decrypted = "[MANUEL S-DES: İşlem terminalden izlenebilir]"
 
+        # 6. RSA (Asimetrik)
         elif algo == "RSA":
             cipher_rsa = PKCS1_OAEP.new(SERVER_PUBLIC_KEY)
             enc_bytes = cipher_rsa.encrypt(msg.encode())
             encrypted = enc_bytes.hex()
-            # Çözme
             decrypt_rsa = PKCS1_OAEP.new(SERVER_PRIVATE_KEY)
             decrypted = decrypt_rsa.decrypt(enc_bytes).decode()
 
@@ -79,5 +98,4 @@ def send():
     return render_template('index.html', result=result)
 
 if __name__ == '__main__':
-    print(">>> Flask Sunucusu Başlatılıyor: http://127.0.0.1:5000")
     app.run(debug=True)
