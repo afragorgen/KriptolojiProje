@@ -13,10 +13,11 @@ try:
     from crypto_utils import (
         aes_encrypt, aes_decrypt, generate_rsa_keys, 
         caesar_encrypt, caesar_decrypt, vigenere_encrypt, vigenere_decrypt,
-        substitution_encrypt, substitution_decrypt
+        substitution_encrypt, substitution_decrypt,
+        affine_encrypt, affine_decrypt
     )
     from manual_sdes import encrypt_text as sdes_encrypt_manual
-    print(">>> [BAŞARILI] Tüm modüller (Substitution dahil) yüklendi.")
+    print(">>> [BAŞARILI] Tüm modüller (Affine dahil) yüklendi.")
 except ImportError as e:
     print(f">>> [HATA] Modül yüklenemedi: {e}")
 
@@ -29,9 +30,9 @@ app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 # --- ANAHTARLAR ---
 AES_KEY = b'16byte_uzun_key!'
 DES_KEY = b'8byt_key'
-# Substitution için rastgele karıştırılmış alfabe (Anahtar)
-SUB_KEY = "QWERTYUIOPĞÜASDFGHJKLŞİZXCVBNM " 
+SUB_KEY = "QWERTYUIOPĞÜASDFGHJKLŞİZXCVBNM " # Substitution Key
 
+# RSA Hazırlığı
 PRIVATE_KEY_PEM, PUBLIC_KEY_PEM = generate_rsa_keys()
 SERVER_PRIVATE_KEY = RSA.import_key(PRIVATE_KEY_PEM)
 SERVER_PUBLIC_KEY = RSA.import_key(PUBLIC_KEY_PEM)
@@ -41,14 +42,18 @@ def index():
     return render_template('index.html')
 
 # ==========================================
-#  ŞİFRELEME (SEND)
+# 📤 ŞİFRELEME ROTASI (SEND)
 # ==========================================
 @app.route('/send', methods=['POST'])
 def send():
-    msg = request.form.get('message', '').upper() # Substitution için büyük harf standardı
+    msg = request.form.get('message', '').upper()
     algo = request.form.get('algo', 'AES')
     try:
-        if algo == "SUBSTITUTION":
+        if algo == "AFFINE":
+            # a=5 ve b=8 seçildi (29 ile aralarında asal olmalı)
+            encrypted = affine_encrypt(msg, 5, 8)
+            decrypted = affine_decrypt(encrypted, 5, 8)
+        elif algo == "SUBSTITUTION":
             encrypted = substitution_encrypt(msg, SUB_KEY)
             decrypted = substitution_decrypt(encrypted, SUB_KEY)
         elif algo == "CAESAR":
@@ -76,14 +81,16 @@ def send():
     return render_template('index.html', result=res)
 
 # ==========================================
-#  ŞİFRE ÇÖZME (DECRYPT)
+# 🔓 ŞİFRE ÇÖZME ROTASI (DECRYPT)
 # ==========================================
 @app.route('/decrypt', methods=['POST'])
 def decrypt_direct():
     enc_text = request.form.get('encrypted_message', '').strip().upper()
     algo = request.form.get('algo', 'AES')
     try:
-        if algo == "SUBSTITUTION":
+        if algo == "AFFINE":
+            decrypted = affine_decrypt(enc_text, 5, 8)
+        elif algo == "SUBSTITUTION":
             decrypted = substitution_decrypt(enc_text, SUB_KEY)
         elif algo == "CAESAR":
             decrypted = caesar_decrypt(enc_text, 3)

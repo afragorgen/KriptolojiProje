@@ -78,3 +78,39 @@ def substitution_decrypt(text, key_alphabet):
         else:
             result += char
     return result
+
+# --- AFFINE CIPHER ---
+def modInverse(a, m):
+    for x in range(1, m):
+        if (((a % m) * (x % m)) % m == 1):
+            return x
+    return -1
+
+def affine_encrypt(text, a=5, b=8):
+    # Formül: E(x) = (ax + b) mod 29
+    result = ""
+    alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ"
+    m = len(alphabet)
+    for char in text.upper():
+        if char in alphabet:
+            x = alphabet.index(char)
+            result += alphabet[(a * x + b) % m]
+        else:
+            result += char
+    return result
+
+def affine_decrypt(text, a=5, b=8):
+    # Formül: D(x) = a^-1 * (x - b) mod 29
+    result = ""
+    alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ"
+    m = len(alphabet)
+    a_inv = modInverse(a, m)
+    if a_inv == -1: return "Hata: 'a' değerinin tersi yok!"
+    
+    for char in text.upper():
+        if char in alphabet:
+            y = alphabet.index(char)
+            result += alphabet[(a_inv * (y - b)) % m]
+        else:
+            result += char
+    return result
