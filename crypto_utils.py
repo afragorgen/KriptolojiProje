@@ -3,6 +3,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Util.Padding import pad, unpad
 
+
 # --- CAESAR ---
 def caesar_encrypt(text, shift=3):
     result = ""
@@ -52,3 +53,28 @@ def aes_decrypt(combined_data, key):
 def generate_rsa_keys():
     key = RSA.generate(2048)
     return key.export_key(), key.publickey().export_key()
+
+
+import random
+def substitution_encrypt(text, key_alphabet):
+    normal_alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ "
+    text = text.upper()
+    result = ""
+    for char in text:
+        if char in normal_alphabet:
+            idx = normal_alphabet.index(char)
+            result += key_alphabet[idx]
+        else:
+            result += char
+    return result
+
+def substitution_decrypt(text, key_alphabet):
+    normal_alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ "
+    result = ""
+    for char in text:
+        if char in key_alphabet:
+            idx = key_alphabet.index(char)
+            result += normal_alphabet[idx]
+        else:
+            result += char
+    return result

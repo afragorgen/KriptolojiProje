@@ -8,6 +8,7 @@
         body { background: #f0f2f5; padding-bottom: 50px; }
         .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 20px; }
         .nav-tabs .nav-link { color: #495057; font-weight: bold; }
+        code { word-wrap: break-word; white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -26,6 +27,7 @@
                     <select class="form-select mb-3" name="algo">
                         <option value="AES">AES-128</option>
                         <option value="RSA">RSA</option>
+                        <option value="SUBSTITUTION">Substitution (Yerine Koyma)</option>
                         <option value="CAESAR">Sezar</option>
                         <option value="VIGENERE">Vigenere</option>
                         <option value="SDES">S-DES</option>
@@ -46,6 +48,7 @@
                     <select class="form-select mb-3" name="algo">
                         <option value="AES">AES-128</option>
                         <option value="RSA">RSA</option>
+                        <option value="SUBSTITUTION">Substitution (Yerine Koyma)</option>
                         <option value="CAESAR">Sezar</option>
                         <option value="VIGENERE">Vigenere</option>
                     </select>
@@ -63,7 +66,7 @@
                 <p class="text-danger"><strong>Hata:</strong> {{ result.error }}</p>
             {% else %}
                 <p><strong>Algoritma:</strong> <span class="badge bg-dark">{{ result.algo }}</span></p>
-                <p><strong>Şifreli Veri:</strong> <code class="text-danger">{{ result.encrypted }}</code></p>
+                <p><strong>İşlem Yapılan Veri:</strong> <code class="text-danger">{{ result.encrypted }}</code></p>
                 <p><strong>Sonuç:</strong> <span class="h5 text-success fw-bold">{{ result.decrypted }}</span></p>
             {% endif %}
         </div>
