@@ -7,9 +7,8 @@ from Crypto.Cipher import DES, PKCS1_OAEP, AES, Blowfish
 from Crypto.PublicKey import RSA
 from Crypto.Util.Padding import pad, unpad
 
-# ==========================================
-# 1. S-DES ALGORİTMASI (ENTEGRE)
-# ==========================================
+
+# 1. EĞİTİM MODELİ: S-DES (Tamamen Manuel)
 P10 = (3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
 P8 = (6, 3, 7, 4, 8, 5, 10, 9)
 P4 = (2, 4, 3, 1)
@@ -54,9 +53,8 @@ def sdes_encrypt_text(text):
         res.append(format(int("".join(map(str, permute(bits, IP_INV))), 2), '02X'))
     return "-".join(res)
 
-# ==========================================
-# 2. FLASK VE MODÜL AYARLARI
-# ==========================================
+
+# 2. AYARLAR VE MODÜL YÜKLEME
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 
@@ -68,15 +66,15 @@ except ImportError as e:
 
 app = Flask(__name__)
 
-# --- SABİT ANAHTARLAR ---
+# Sabit Değerler
 AES_KEY = b'16byte_uzun_key!'
 BLOWFISH_KEY = b'blowfish_key_64'
 DES_KEY = b'8byt_key'
 SUB_KEY = "QWERTYUIOPĞÜASDFGHJKLŞİZXCVBNM "
 SHIFT_N = 5
-TRANS_KEY = "KRIPTO" # Columnar için
+TRANS_KEY = "KRIPTO"
 
-# RSA Hazırlığı
+# RSA Anahtar Üretimi
 PRIVATE_KEY_PEM, PUBLIC_KEY_PEM = generate_rsa_keys()
 SERVER_PRIVATE_KEY = RSA.import_key(PRIVATE_KEY_PEM)
 SERVER_PUBLIC_KEY = RSA.import_key(PUBLIC_KEY_PEM)
@@ -85,14 +83,13 @@ SERVER_PUBLIC_KEY = RSA.import_key(PUBLIC_KEY_PEM)
 def index():
     return render_template('index.html')
 
-# ==========================================
 # 📤 ŞİFRELEME ROTASI
-# ==========================================
 @app.route('/send', methods=['POST'])
 def send():
     msg = request.form.get('message', '').upper()
     algo = request.form.get('algo', 'AES')
     try:
+        # --- 1. MODERN & KÜTÜPHANE DESTEKLİ ---
         if algo == "AES":
             enc_b = aes_encrypt(msg, AES_KEY); encrypted = enc_b.hex()
             decrypted = aes_decrypt(enc_b, AES_KEY)
@@ -102,81 +99,81 @@ def send():
         elif algo == "RSA":
             c = PKCS1_OAEP.new(SERVER_PUBLIC_KEY); enc_b = c.encrypt(msg.encode())
             encrypted = enc_b.hex(); decrypted = PKCS1_OAEP.new(SERVER_PRIVATE_KEY).decrypt(enc_b).decode()
+        elif algo == "DES":
+            c = DES.new(DES_KEY, DES.MODE_ECB); enc_b = c.encrypt(pad(msg.encode(), DES.block_size))
+            encrypted = enc_b.hex(); decrypted = unpad(c.decrypt(enc_b), DES.block_size).decode()
+
+        # --- 2. EĞİTİM MODELİ (MANUEL) ---
+        elif algo == "SDES":
+            encrypted = sdes_encrypt_text(msg); decrypted = "[Eğitim Modu Analizi]"
+
+        # --- 3. MATEMATİKSEL & BLOK (MANUEL) ---
         elif algo == "HILL":
             encrypted = hill_encrypt(msg); decrypted = hill_decrypt(encrypted)
+        elif algo == "PLAYFAIR":
+            encrypted = playfair_encrypt(msg, "ANAHTAR"); decrypted = playfair_decrypt(encrypted, "ANAHTAR")
+        elif algo == "AFFINE":
+            encrypted = affine_encrypt(msg, 5, 8); decrypted = affine_decrypt(encrypted, 5, 8)
+
+        # --- 4. YER DEĞİŞTİRME / TRANSPOSITION (MANUEL) ---
         elif algo == "COLUMNAR":
             encrypted = columnar_encrypt(msg, TRANS_KEY); decrypted = columnar_decrypt(encrypted, TRANS_KEY)
         elif algo == "RAILFENCE":
             encrypted = rail_fence_encrypt(msg, 3); decrypted = rail_fence_decrypt(encrypted, 3)
-        elif algo == "SHIFT":
-            encrypted = caesar_encrypt(msg, SHIFT_N); decrypted = caesar_decrypt(encrypted, SHIFT_N)
-        elif algo == "CAESAR":
-            encrypted = caesar_encrypt(msg, 3); decrypted = caesar_decrypt(encrypted, 3)
-        elif algo == "AFFINE":
-            encrypted = affine_encrypt(msg, 5, 8); decrypted = affine_decrypt(encrypted, 5, 8)
-        elif algo == "SUBSTITUTION":
-            encrypted = substitution_encrypt(msg, SUB_KEY); decrypted = substitution_decrypt(encrypted, SUB_KEY)
+        elif algo == "ROUTE":
+            encrypted = route_encrypt(msg, 4); decrypted = "[Spiral Rota - Manuel Çözüm]"
+
+        # --- 5. KLASİK & SEMBOLİK (MANUEL) ---
+        elif algo == "POLYBIUS":
+            encrypted = polybius_encrypt(msg); decrypted = polybius_decrypt(encrypted)
+        elif algo == "PIGPEN":
+            encrypted = pigpen_encrypt(msg); decrypted = pigpen_decrypt(encrypted)
         elif algo == "VIGENERE":
             encrypted = vigenere_encrypt(msg, "KRIPTO"); decrypted = vigenere_decrypt(encrypted, "KRIPTO")
-        elif algo == "DES":
-            c = DES.new(DES_KEY, DES.MODE_ECB); enc_b = c.encrypt(pad(msg.encode(), DES.block_size))
-            encrypted = enc_b.hex(); decrypted = unpad(c.decrypt(enc_b), DES.block_size).decode()
-        elif algo == "SDES":
-            encrypted = sdes_encrypt_text(msg); decrypted = "[Eğitim Modu]"
-        elif algo == "ROUTE":
-             encrypted = route_encrypt(msg, 4)
-             decrypted = "[Çözme: Manuel Rota Takibi]"
-        elif algo == "PLAYFAIR":
-            encrypted = playfair_encrypt(msg, "ANAHTAR")
-            decrypted = playfair_decrypt(encrypted, "ANAHTAR")
-        elif algo == "POLYBIUS":
-            encrypted = polybius_encrypt(msg)
-            decrypted = polybius_decrypt(encrypted)
-        elif algo == "PIGPEN":
-            encrypted = pigpen_encrypt(msg)
-            decrypted = pigpen_decrypt(encrypted)
-      
- 
+        elif algo == "CAESAR":
+            encrypted = caesar_encrypt(msg, 3); decrypted = caesar_decrypt(encrypted, 3)
+        elif algo == "SHIFT":
+            encrypted = caesar_encrypt(msg, SHIFT_N); decrypted = caesar_decrypt(encrypted, SHIFT_N)
+        elif algo == "SUBSTITUTION":
+            encrypted = substitution_encrypt(msg, SUB_KEY); decrypted = substitution_decrypt(encrypted, SUB_KEY)
         
-        res = {"algo": algo, "encrypted": encrypted, "decrypted": decrypted, "mode": "Şifreleme"}
+        res = {"algo": algo, "encrypted": encrypted, "decrypted": decrypted, "mode": "Şifreleme İşlemi"}
     except Exception as e:
         res = {"algo": algo, "error": f"Hata: {str(e)}"}
     return render_template('index.html', result=res)
 
-# ==========================================
 # 🔓 ŞİFRE ÇÖZME ROTASI
-# ==========================================
+
 @app.route('/decrypt', methods=['POST'])
 def decrypt_direct():
     enc_text = request.form.get('encrypted_message', '').strip()
     algo = request.form.get('algo', 'AES')
     try:
+        # --- MODERN ---
         if algo == "AES": decrypted = aes_decrypt(bytes.fromhex(enc_text), AES_KEY)
         elif algo == "BLOWFISH": decrypted = blowfish_decrypt(bytes.fromhex(enc_text), BLOWFISH_KEY)
         elif algo == "RSA": decrypted = PKCS1_OAEP.new(SERVER_PRIVATE_KEY).decrypt(bytes.fromhex(enc_text)).decode()
-        elif algo == "HILL": decrypted = hill_decrypt(enc_text.upper())
-        elif algo == "COLUMNAR": decrypted = columnar_decrypt(enc_text.upper(), TRANS_KEY)
-        elif algo == "RAILFENCE": decrypted = rail_fence_decrypt(enc_text.upper(), 3)
-        elif algo == "SHIFT": decrypted = caesar_decrypt(enc_text.upper(), SHIFT_N)
-        elif algo == "CAESAR": decrypted = caesar_decrypt(enc_text.upper(), 3)
-        elif algo == "AFFINE": decrypted = affine_decrypt(enc_text.upper(), 5, 8)
-        elif algo == "SUBSTITUTION": decrypted = substitution_decrypt(enc_text.upper(), SUB_KEY)
-        elif algo == "VIGENERE": decrypted = vigenere_decrypt(enc_text.upper(), "KRIPTO")
         elif algo == "DES":
             c = DES.new(DES_KEY, DES.MODE_ECB)
             decrypted = unpad(c.decrypt(bytes.fromhex(enc_text)), DES.block_size).decode()
-        elif algo == "ROUTE":
-            decrypted = "Spiral Rota ile Deşifre Edildi (Geliştirme Aşamasında)"
-        elif algo == "PLAYFAIR":
-            decrypted = playfair_decrypt(enc_text.upper(), "ANAHTAR")
-        elif algo == "POLYBIUS":
-            decrypted = polybius_decrypt(enc_text)
-        elif algo == "PIGPEN":
-            decrypted = pigpen_decrypt(enc_text)
+        
+        # --- MANUEL KLASİK & DİĞERLERİ ---
+        elif algo == "HILL": decrypted = hill_decrypt(enc_text.upper())
+        elif algo == "PLAYFAIR": decrypted = playfair_decrypt(enc_text.upper(), "ANAHTAR")
+        elif algo == "POLYBIUS": decrypted = polybius_decrypt(enc_text)
+        elif algo == "PIGPEN": decrypted = pigpen_decrypt(enc_text)
+        elif algo == "COLUMNAR": decrypted = columnar_decrypt(enc_text.upper(), TRANS_KEY)
+        elif algo == "RAILFENCE": decrypted = rail_fence_decrypt(enc_text.upper(), 3)
+        elif algo == "VIGENERE": decrypted = vigenere_decrypt(enc_text.upper(), "KRIPTO")
+        elif algo == "CAESAR": decrypted = caesar_decrypt(enc_text.upper(), 3)
+        elif algo == "SHIFT": decrypted = caesar_decrypt(enc_text.upper(), SHIFT_N)
+        elif algo == "AFFINE": decrypted = affine_decrypt(enc_text.upper(), 5, 8)
+        elif algo == "SUBSTITUTION": decrypted = substitution_decrypt(enc_text.upper(), SUB_KEY)
+        elif algo == "ROUTE": decrypted = "Spiral Rota çözümü manuel matris analizi gerektirir."
 
-        res = {"algo": algo, "encrypted": enc_text, "decrypted": decrypted, "mode": "Şifre Çözme"}
+        res = {"algo": algo, "encrypted": enc_text, "decrypted": decrypted, "mode": "Şifre Çözme İşlemi"}
     except Exception as e:
-        res = {"algo": algo, "error": "Hata: Geçersiz format veya anahtar!"}
+        res = {"algo": algo, "error": "Hata: Geçersiz veri formatı!"}
     return render_template('index.html', result=res)
 
 if __name__ == '__main__':

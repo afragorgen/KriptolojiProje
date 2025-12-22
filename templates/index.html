@@ -14,7 +14,7 @@
         .btn { border-radius: 10px; font-weight: 600; padding: 12px; }
         code { background: #fff1f1; padding: 5px 10px; border-radius: 6px; color: #d63384; word-break: break-all; font-size: 0.95rem; }
         .result-panel { border-left: 6px solid #0dcaf0; background: white; }
-        optgroup { font-weight: bold; color: #4e73df; }
+        optgroup { font-weight: bold; color: #2c3e50; background-color: #f8f9fa; }
     </style>
 </head>
 <body>
@@ -35,40 +35,42 @@
                     <form action="/send" method="POST">
                         <div class="mb-4">
                             <label class="form-label fw-bold">Düz Metin (Plaintext):</label>
-                            <textarea class="form-control" name="message" rows="3" placeholder="Şifrelemek istediğiniz mesajı buraya yazın..." required></textarea>
+                            <textarea class="form-control" name="message" rows="3" placeholder="Şifrelemek istediğiniz mesajı yazın..." required></textarea>
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-bold">Algoritma Seçin:</label>
                             <select class="form-select form-select-lg" name="algo">
-                                <optgroup label="Modern Blok & Asimetrik">
+                                <optgroup label="Modern & Endüstriyel (Kütüphane Bazlı)">
                                     <option value="AES">AES-128 (Gelişmiş Standart)</option>
                                     <option value="BLOWFISH">Blowfish (Hızlı Blok)</option>
                                     <option value="RSA">RSA (Açık Anahtarlı)</option>
+                                    <option value="DES">DES (Klasik Standart)</option>
                                 </optgroup>
-                                <optgroup label="Matematiksel Algoritmalar">
-                                    <option value="HILL">Hill Cipher (Matris 2x2)</option>
+                                <optgroup label="Eğitim & Analiz Modeli (Manuel Kod)">
+                                    <option value="SDES">S-DES (Basitleştirilmiş DES)</option>
+                                </optgroup>
+                                <optgroup label="Matematiksel & Blok (Manuel Kod)">
+                                    <option value="HILL">Hill Cipher (Matris Temelli)</option>
+                                    <option value="PLAYFAIR">Playfair Cipher (Harf Çiftleri)</option>
                                     <option value="AFFINE">Affine Cipher (Lineer)</option>
-                                    <option value="PLAYFAIR">Playfair Cipher (İkili Harf Bloğu)</option>
                                 </optgroup>
-                                <optgroup label="Klasik Yöntemler">
-                                    <option value="VIGENERE">Vigenere (Çoklu Alfabe)</option>
-                                    <option value="SHIFT">Shift Cipher (n=5)</option>
+                                <optgroup label="Yer Değiştirme / Transposition (Manuel Kod)">
+                                    <option value="COLUMNAR">Columnar Transposition</option>
+                                    <option value="RAILFENCE">Rail Fence (Zikzak)</option>
+                                    <option value="ROUTE">Route Cipher (Spiral)</option>
+                                </optgroup>
+                                <optgroup label="Klasik & Sembolik (Manuel Kod)">
+                                    <option value="PIGPEN">Pigpen (Masonik Semboller)</option>
+                                    <option value="POLYBIUS">Polybius Square (Koordinat)</option>
+                                    <option value="VIGENERE">Vigenere (Polialfabetik)</option>
                                     <option value="CAESAR">Caesar (n=3)</option>
-                                    <option value="SUBSTITUTION">Substitution (Yerine Koyma)</option>
-                                    <option value="RAILFENCE">Rail Fence (Zikzak - 3 Satır)</option>
-                                    <option value="COLUMNAR">Columnar Transposition (Sütunlu)</option>
-                                    <option value="ROUTE">Route Cipher (Spiral Rota)</option>
-                                    <option value="POLYBIUS">Polybius Square (Koordinat Temelli)</option>
-                                    <option value="PIGPEN">Pigpen Cipher (Masonik Şifreleme)</option>
-                                </optgroup>
-                                <optgroup label="Eski Standartlar">
-                                    <option value="DES">DES (Klasik)</option>
-                                    <option value="SDES">S-DES (Eğitim Modu)</option>
+                                    <option value="SHIFT">Shift Cipher (n=5)</option>
+                                    <option value="SUBSTITUTION">Substitution (Alfabe Değişimi)</option>
                                 </optgroup>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 mb-2">
-                            <i class="bi bi-shield-check"></i> ŞİFRELE VE GÖNDER
+                            <i class="bi bi-shield-check"></i> ŞİFRELE VE ANALİZ ET
                         </button>
                     </form>
                 </div>
@@ -84,27 +86,31 @@
                     <form action="/decrypt" method="POST">
                         <div class="mb-4">
                             <label class="form-label fw-bold">Şifreli Metin (Ciphertext):</label>
-                            <textarea class="form-control" name="encrypted_message" rows="3" placeholder="Çözmek istediğiniz hex kodu veya metni yapıştırın..." required></textarea>
+                            <textarea class="form-control" name="encrypted_message" rows="3" placeholder="Çözülecek hex kodu veya metni yapıştırın..." required></textarea>
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-bold">Kullanılan Metot:</label>
                             <select class="form-select form-select-lg" name="algo">
-                                <option value="AES">AES-128</option>
-                                <option value="BLOWFISH">Blowfish</option>
-                                <option value="RSA">RSA</option>
-                                <option value="HILL">Hill Cipher</option>
-                                <option value="AFFINE">Affine</option>
-                                <option value="VIGENERE">Vigenere</option>
-                                <option value="SHIFT">Shift Cipher</option>
-                                <option value="CAESAR">Caesar</option>
-                                <option value="SUBSTITUTION">Substitution</option>
-                                <option value="DES">DES</option>
-                                <option value="RAILFENCE">Rail Fence (Zikzak - 3 Satır)</option>
-                                <option value="COLUMNAR">Columnar Transposition (Sütunlu)</option>
-                                <option value="ROUTE">Route Cipher (Spiral Rota)</option>
-                                <option value="PLAYFAIR">Playfair Cipher (İkili Harf Bloğu)</option>
-                                <option value="POLYBIUS">Polybius Square (Koordinat Temelli)</option>
-                                <option value="PIGPEN">Pigpen Cipher (Masonik Şifreleme)</option>
+                                <optgroup label="Modern & Kütüphane Bazlı">
+                                    <option value="AES">AES-128</option>
+                                    <option value="BLOWFISH">Blowfish</option>
+                                    <option value="RSA">RSA</option>
+                                    <option value="DES">DES</option>
+                                </optgroup>
+                                <optgroup label="Klasik & Manuel Modeller">
+                                    <option value="HILL">Hill Cipher</option>
+                                    <option value="PLAYFAIR">Playfair Cipher</option>
+                                    <option value="AFFINE">Affine</option>
+                                    <option value="COLUMNAR">Columnar Transposition</option>
+                                    <option value="RAILFENCE">Rail Fence</option>
+                                    <option value="ROUTE">Route Cipher</option>
+                                    <option value="PIGPEN">Pigpen</option>
+                                    <option value="POLYBIUS">Polybius Square</option>
+                                    <option value="VIGENERE">Vigenere</option>
+                                    <option value="CAESAR">Caesar</option>
+                                    <option value="SHIFT">Shift Cipher</option>
+                                    <option value="SUBSTITUTION">Substitution</option>
+                                </optgroup>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-success w-100 mb-2">
@@ -140,17 +146,17 @@
                     </div>
                     
                     <div class="col-md-4 py-3 border-bottom">
-                        <span class="text-muted fw-bold">Giriş Verisi:</span>
+                        <span class="text-muted fw-bold">İşlem Gören Veri:</span>
                     </div>
                     <div class="col-md-8 py-3 border-bottom">
                         <code>{{ result.encrypted }}</code>
                     </div>
                     
                     <div class="col-md-4 py-3 bg-light rounded-start">
-                        <span class="text-success fw-bold h5 mb-0">İşlem Sonucu:</span>
+                        <span class="text-success fw-bold h5 mb-0">Sonuç (Plain/Cipher):</span>
                     </div>
                     <div class="col-md-8 py-3 bg-light rounded-end text-success">
-                        <span class="h4 fw-bold mb-0">{{ result.decrypted }}</span>
+                        <span class="h4 fw-bold mb-0" style="font-family: 'Courier New', Courier, monospace;">{{ result.decrypted }}</span>
                     </div>
                 </div>
             {% endif %}
