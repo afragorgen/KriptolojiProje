@@ -114,3 +114,10 @@ def affine_decrypt(text, a=5, b=8):
         else:
             result += char
     return result
+
+def shift_cipher_encrypt(text, n):
+    # n değerini alfabe uzunluğuna göre mod alarak normalize edelim
+    return caesar_encrypt(text, shift=n)
+
+def shift_cipher_decrypt(text, n):
+    return caesar_encrypt(text, shift=-n)

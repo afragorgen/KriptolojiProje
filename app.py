@@ -2,9 +2,7 @@ import os
 import sys
 from flask import Flask, render_template, request
 
-# ==========================================
 # ÇALIŞMA DİZİNİ VE IMPORT AYARI
-# ==========================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
@@ -17,7 +15,7 @@ try:
         affine_encrypt, affine_decrypt
     )
     from manual_sdes import encrypt_text as sdes_encrypt_manual
-    print(">>> [BAŞARILI] Tüm modüller (Affine dahil) yüklendi.")
+    print(">>> [BAŞARILI] Tüm modüller yüklendi.")
 except ImportError as e:
     print(f">>> [HATA] Modül yüklenemedi: {e}")
 
@@ -30,9 +28,9 @@ app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 # --- ANAHTARLAR ---
 AES_KEY = b'16byte_uzun_key!'
 DES_KEY = b'8byt_key'
-SUB_KEY = "QWERTYUIOPĞÜASDFGHJKLŞİZXCVBNM " # Substitution Key
+SUB_KEY = "QWERTYUIOPĞÜASDFGHJKLŞİZXCVBNM " 
+SHIFT_N = 5 # Shift Cipher için varsayılan kaydırma miktarı
 
-# RSA Hazırlığı
 PRIVATE_KEY_PEM, PUBLIC_KEY_PEM = generate_rsa_keys()
 SERVER_PRIVATE_KEY = RSA.import_key(PRIVATE_KEY_PEM)
 SERVER_PUBLIC_KEY = RSA.import_key(PUBLIC_KEY_PEM)
@@ -41,24 +39,27 @@ SERVER_PUBLIC_KEY = RSA.import_key(PUBLIC_KEY_PEM)
 def index():
     return render_template('index.html')
 
-# ==========================================
-# 📤 ŞİFRELEME ROTASI (SEND)
-# ==========================================
+#  ŞİFRELEME ROTASI (SEND)
+
 @app.route('/send', methods=['POST'])
 def send():
     msg = request.form.get('message', '').upper()
     algo = request.form.get('algo', 'AES')
     try:
-        if algo == "AFFINE":
-            # a=5 ve b=8 seçildi (29 ile aralarında asal olmalı)
+        if algo == "SHIFT":
+            # Shift Cipher (n=5 kaydırır)
+            encrypted = caesar_encrypt(msg, SHIFT_N)
+            decrypted = caesar_decrypt(encrypted, SHIFT_N)
+        elif algo == "CAESAR":
+            # Orijinal Sezar (n=3 kaydırır)
+            encrypted = caesar_encrypt(msg, 3)
+            decrypted = caesar_decrypt(encrypted, 3)
+        elif algo == "AFFINE":
             encrypted = affine_encrypt(msg, 5, 8)
             decrypted = affine_decrypt(encrypted, 5, 8)
         elif algo == "SUBSTITUTION":
             encrypted = substitution_encrypt(msg, SUB_KEY)
             decrypted = substitution_decrypt(encrypted, SUB_KEY)
-        elif algo == "CAESAR":
-            encrypted = caesar_encrypt(msg, 3)
-            decrypted = caesar_decrypt(encrypted, 3)
         elif algo == "VIGENERE":
             encrypted = vigenere_encrypt(msg, "KRIPTO")
             decrypted = vigenere_decrypt(encrypted, "KRIPTO")
@@ -80,20 +81,21 @@ def send():
         res = {"algo": algo, "error": f"Hata: {str(e)}"}
     return render_template('index.html', result=res)
 
-# ==========================================
 # 🔓 ŞİFRE ÇÖZME ROTASI (DECRYPT)
-# ==========================================
+
 @app.route('/decrypt', methods=['POST'])
 def decrypt_direct():
     enc_text = request.form.get('encrypted_message', '').strip().upper()
     algo = request.form.get('algo', 'AES')
     try:
-        if algo == "AFFINE":
+        if algo == "SHIFT":
+            decrypted = caesar_decrypt(enc_text, SHIFT_N)
+        elif algo == "CAESAR":
+            decrypted = caesar_decrypt(enc_text, 3)
+        elif algo == "AFFINE":
             decrypted = affine_decrypt(enc_text, 5, 8)
         elif algo == "SUBSTITUTION":
             decrypted = substitution_decrypt(enc_text, SUB_KEY)
-        elif algo == "CAESAR":
-            decrypted = caesar_decrypt(enc_text, 3)
         elif algo == "VIGENERE":
             decrypted = vigenere_decrypt(enc_text, "KRIPTO")
         elif algo in ["AES", "DES", "RSA"]:
