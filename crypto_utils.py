@@ -171,3 +171,85 @@ def rail_fence_decrypt(cipher, rails=2):
             direction *= -1
             
     return "".join(result)
+
+import math
+
+# --- COLUMNAR TRANSPOSITION ---
+def columnar_encrypt(text, key="ANAHTAR"):
+    text = text.replace(" ", "").upper()
+    key = key.upper()
+    n_cols = len(key)
+    n_rows = math.ceil(len(text) / n_cols)
+    
+    # Boşlukları 'X' ile doldur (tam matris için)
+    padding = n_rows * n_cols - len(text)
+    text += "X" * padding
+    
+    # Matrisi oluştur
+    matrix = [text[i:i + n_cols] for i in range(0, len(text), n_cols)]
+    
+    # Anahtar sırasını belirle (Örn: ANAHTAR -> A:0, A:2, A:5, H:3, N:1, R:6, T:4)
+    key_order = sorted(range(len(key)), key=lambda k: key[k])
+    
+    result = ""
+    for col in key_order:
+        for row in range(n_rows):
+            result += matrix[row][col]
+            
+    return result
+
+def columnar_decrypt(cipher, key="ANAHTAR"):
+    key = key.upper()
+    n_cols = len(key)
+    n_rows = len(cipher) // n_cols
+    
+    # Anahtar sırasını belirle
+    key_order = sorted(range(len(key)), key=lambda k: key[k])
+    
+    # Boş bir matris oluştur
+    matrix = [['' for _ in range(n_cols)] for _ in range(n_rows)]
+    
+    # Şifreli metni sütun sütun yerleştir
+    index = 0
+    for col in key_order:
+        for row in range(n_rows):
+            matrix[row][col] = cipher[index]
+            index += 1
+            
+    # Satır satır oku
+    return "".join(["".join(row) for row in matrix])
+
+# --- ROUTE CIPHER (Spiral Path) ---
+def route_encrypt(text, cols=4):
+    text = text.replace(" ", "").upper()
+    rows = math.ceil(len(text) / cols)
+    padding = rows * cols - len(text)
+    text += "X" * padding  # Izgarayı doldur
+    
+    # Izgarayı oluştur
+    grid = [list(text[i:i + cols]) for i in range(0, len(text), cols)]
+    
+    result = []
+    top, bottom, left, right = 0, rows - 1, 0, cols - 1
+    
+    while top <= bottom and left <= right:
+        # Üst satır (soldan sağa)
+        for i in range(left, right + 1):
+            result.append(grid[top][i])
+        top += 1
+        # Sağ sütun (yukarıdan aşağıya)
+        for i in range(top, bottom + 1):
+            result.append(grid[i][right])
+        right -= 1
+        # Alt satır (sağdan sola)
+        if top <= bottom:
+            for i in range(right, left - 1, -1):
+                result.append(grid[bottom][i])
+            bottom -= 1
+        # Sol sütun (aşağıdan yukarıya)
+        if left <= right:
+            for i in range(bottom, top - 1, -1):
+                result.append(grid[i][left])
+            left += 1
+            
+    return "".join(result)

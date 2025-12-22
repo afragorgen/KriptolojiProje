@@ -1,14 +1,15 @@
 import os
 import sys
 import numpy as np
+import math
 from flask import Flask, render_template, request
 from Crypto.Cipher import DES, PKCS1_OAEP, AES, Blowfish
 from Crypto.PublicKey import RSA
 from Crypto.Util.Padding import pad, unpad
 
-
-# 1. S-DES ALGORİTMASI (DOĞRUDAN ENTEGRE)
-
+# ==========================================
+# 1. S-DES ALGORİTMASI (ENTEGRE)
+# ==========================================
 P10 = (3, 5, 2, 7, 4, 10, 1, 9, 8, 6)
 P8 = (6, 3, 7, 4, 8, 5, 10, 9)
 P4 = (2, 4, 3, 1)
@@ -63,16 +64,17 @@ try:
     from crypto_utils import *
     print(">>> [BAŞARILI] crypto_utils yüklendi.")
 except ImportError as e:
-    print(f">>> [KRİTİK HATA] crypto_utils.py bulunamadı: {e}")
+    print(f">>> [HATA] crypto_utils.py bulunamadı: {e}")
 
 app = Flask(__name__)
 
-# --- ANAHTARLAR ---
+# --- SABİT ANAHTARLAR ---
 AES_KEY = b'16byte_uzun_key!'
 BLOWFISH_KEY = b'blowfish_key_64'
 DES_KEY = b'8byt_key'
 SUB_KEY = "QWERTYUIOPĞÜASDFGHJKLŞİZXCVBNM "
 SHIFT_N = 5
+TRANS_KEY = "KRIPTO" # Columnar için
 
 # RSA Hazırlığı
 PRIVATE_KEY_PEM, PUBLIC_KEY_PEM = generate_rsa_keys()
@@ -83,9 +85,9 @@ SERVER_PUBLIC_KEY = RSA.import_key(PUBLIC_KEY_PEM)
 def index():
     return render_template('index.html')
 
-
-#  ŞİFRELEME ROTASI
-
+# ==========================================
+# 📤 ŞİFRELEME ROTASI
+# ==========================================
 @app.route('/send', methods=['POST'])
 def send():
     msg = request.form.get('message', '').upper()
@@ -102,6 +104,10 @@ def send():
             encrypted = enc_b.hex(); decrypted = PKCS1_OAEP.new(SERVER_PRIVATE_KEY).decrypt(enc_b).decode()
         elif algo == "HILL":
             encrypted = hill_encrypt(msg); decrypted = hill_decrypt(encrypted)
+        elif algo == "COLUMNAR":
+            encrypted = columnar_encrypt(msg, TRANS_KEY); decrypted = columnar_decrypt(encrypted, TRANS_KEY)
+        elif algo == "RAILFENCE":
+            encrypted = rail_fence_encrypt(msg, 3); decrypted = rail_fence_decrypt(encrypted, 3)
         elif algo == "SHIFT":
             encrypted = caesar_encrypt(msg, SHIFT_N); decrypted = caesar_decrypt(encrypted, SHIFT_N)
         elif algo == "CAESAR":
@@ -116,18 +122,21 @@ def send():
             c = DES.new(DES_KEY, DES.MODE_ECB); enc_b = c.encrypt(pad(msg.encode(), DES.block_size))
             encrypted = enc_b.hex(); decrypted = unpad(c.decrypt(enc_b), DES.block_size).decode()
         elif algo == "SDES":
-            encrypted = sdes_encrypt_text(msg); decrypted = "[Eğitim Amaçlı]"
-        elif algo == "RAILFENCE":
-            encrypted = rail_fence_encrypt(msg, 3)
-            decrypted = rail_fence_decrypt(encrypted, 3)
+            encrypted = sdes_encrypt_text(msg); decrypted = "[Eğitim Modu]"
+        elif algo == "ROUTE":
+             encrypted = route_encrypt(msg, 4)
+             decrypted = "[Çözme: Manuel Rota Takibi]"
+      
+ 
         
         res = {"algo": algo, "encrypted": encrypted, "decrypted": decrypted, "mode": "Şifreleme"}
     except Exception as e:
         res = {"algo": algo, "error": f"Hata: {str(e)}"}
     return render_template('index.html', result=res)
 
-#  ŞİFRE ÇÖZME ROTASI
-
+# ==========================================
+# 🔓 ŞİFRE ÇÖZME ROTASI
+# ==========================================
 @app.route('/decrypt', methods=['POST'])
 def decrypt_direct():
     enc_text = request.form.get('encrypted_message', '').strip()
@@ -137,6 +146,8 @@ def decrypt_direct():
         elif algo == "BLOWFISH": decrypted = blowfish_decrypt(bytes.fromhex(enc_text), BLOWFISH_KEY)
         elif algo == "RSA": decrypted = PKCS1_OAEP.new(SERVER_PRIVATE_KEY).decrypt(bytes.fromhex(enc_text)).decode()
         elif algo == "HILL": decrypted = hill_decrypt(enc_text.upper())
+        elif algo == "COLUMNAR": decrypted = columnar_decrypt(enc_text.upper(), TRANS_KEY)
+        elif algo == "RAILFENCE": decrypted = rail_fence_decrypt(enc_text.upper(), 3)
         elif algo == "SHIFT": decrypted = caesar_decrypt(enc_text.upper(), SHIFT_N)
         elif algo == "CAESAR": decrypted = caesar_decrypt(enc_text.upper(), 3)
         elif algo == "AFFINE": decrypted = affine_decrypt(enc_text.upper(), 5, 8)
@@ -145,12 +156,12 @@ def decrypt_direct():
         elif algo == "DES":
             c = DES.new(DES_KEY, DES.MODE_ECB)
             decrypted = unpad(c.decrypt(bytes.fromhex(enc_text)), DES.block_size).decode()
-        elif algo == "RAILFENCE":
-            decrypted = rail_fence_decrypt(enc_text.upper(), 3)
-        
+        elif algo == "ROUTE":
+            decrypted = "Spiral Rota ile Deşifre Edildi (Geliştirme Aşamasında)"
+            
         res = {"algo": algo, "encrypted": enc_text, "decrypted": decrypted, "mode": "Şifre Çözme"}
     except Exception as e:
-        res = {"algo": algo, "error": "Hata: Format veya anahtar geçersiz!"}
+        res = {"algo": algo, "error": "Hata: Geçersiz format veya anahtar!"}
     return render_template('index.html', result=res)
 
 if __name__ == '__main__':
