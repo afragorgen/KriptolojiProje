@@ -2,99 +2,151 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kriptoloji İşlem Merkezi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background: #f4f7f6; padding-bottom: 50px; }
-        .card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 20px; border: none; }
-        .btn-primary { background-color: #4e73df; border: none; }
-        .btn-success { background-color: #1cc88a; border: none; }
-        code { word-wrap: break-word; white-space: pre-wrap; color: #e83e8c; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 60px; }
+        .card { border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 20px; transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .btn { border-radius: 10px; font-weight: 600; padding: 12px; }
+        code { background: #fff1f1; padding: 5px 10px; border-radius: 6px; color: #d63384; word-break: break-all; font-size: 0.95rem; }
+        .result-panel { border-left: 6px solid #0dcaf0; background: white; }
+        optgroup { font-weight: bold; color: #4e73df; }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="text-center mb-5 fw-bold text-secondary">🔐 Kriptoloji İşlem Merkezi</h1>
 
-    <div class="row">
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark"><i class="bi bi-shield-lock-fill text-primary"></i> Kriptoloji İşlem Merkezi</h1>
+        <p class="text-muted">Klasik ve Modern Şifreleme Algoritmaları Laboratuvarı</p>
+    </div>
+
+    <div class="row gx-4">
         <div class="col-md-6">
-            <div class="card p-4">
-                <h4 class="text-primary border-bottom pb-2 mb-3">📤 Mesaj Şifrele</h4>
-                <form action="/send" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Düz Metin:</label>
-                        <textarea class="form-control" name="message" rows="2" placeholder="Şifrelenecek metni yazın..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Algoritma Seçin:</label>
-                        <select class="form-select" name="algo">
-                            <option value="AES">AES-128 (Modern)</option>
-                            <option value="RSA">RSA (Asimetrik)</option>
-                            <option value="SHIFT">Shift Cipher (n=5)</option>
-                            <option value="CAESAR">Caesar (n=3)</option>
-                            <option value="AFFINE">Affine (Matematiksel)</option>
-                            <option value="SUBSTITUTION">Substitution (Yerine Koyma)</option>
-                            <option value="VIGENERE">Vigenere (Polialfabetik)</option>
-                            <option value="DES">DES (Klasik Blok)</option>
-                            <option value="SDES">S-DES (Eğitimsel)</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Şifrele ve Sisteme Gönder</button>
-                </form>
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white p-3">
+                    <i class="bi bi-lock-fill"></i> Mesaj Şifreleme (Encryption)
+                </div>
+                <div class="card-body p-4">
+                    <form action="/send" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Düz Metin (Plaintext):</label>
+                            <textarea class="form-control" name="message" rows="3" placeholder="Şifrelemek istediğiniz mesajı buraya yazın..." required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Algoritma Seçin:</label>
+                            <select class="form-select form-select-lg" name="algo">
+                                <optgroup label="Modern Blok & Asimetrik">
+                                    <option value="AES">AES-128 (Gelişmiş Standart)</option>
+                                    <option value="BLOWFISH">Blowfish (Hızlı Blok)</option>
+                                    <option value="RSA">RSA (Açık Anahtarlı)</option>
+                                </optgroup>
+                                <optgroup label="Matematiksel Algoritmalar">
+                                    <option value="HILL">Hill Cipher (Matris 2x2)</option>
+                                    <option value="AFFINE">Affine Cipher (Lineer)</option>
+                                </optgroup>
+                                <optgroup label="Klasik Yöntemler">
+                                    <option value="VIGENERE">Vigenere (Çoklu Alfabe)</option>
+                                    <option value="SHIFT">Shift Cipher (n=5)</option>
+                                    <option value="CAESAR">Caesar (n=3)</option>
+                                    <option value="SUBSTITUTION">Substitution (Yerine Koyma)</option>
+                                </optgroup>
+                                <optgroup label="Eski Standartlar">
+                                    <option value="DES">DES (Klasik)</option>
+                                    <option value="SDES">S-DES (Eğitim Modu)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-shield-check"></i> ŞİFRELE VE GÖNDER
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card p-4">
-                <h4 class="text-success border-bottom pb-2 mb-3">🔓 Şifre Çöz</h4>
-                <form action="/decrypt" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Şifreli Veri (Hex veya Metin):</label>
-                        <textarea class="form-control" name="encrypted_message" rows="2" placeholder="Çözülecek şifreli veriyi yapıştırın..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Algoritma Seçin:</label>
-                        <select class="form-select" name="algo">
-                            <option value="AES">AES-128</option>
-                            <option value="RSA">RSA</option>
-                            <option value="SHIFT">Shift Cipher (n=5)</option>
-                            <option value="CAESAR">Caesar</option>
-                            <option value="AFFINE">Affine</option>
-                            <option value="SUBSTITUTION">Substitution</option>
-                            <option value="VIGENERE">Vigenere</option>
-                            <option value="DES">DES</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100 fw-bold py-2">Şifreyi Çöz</button>
-                </form>
+            <div class="card h-100">
+                <div class="card-header bg-success text-white p-3">
+                    <i class="bi bi-unlock-fill"></i> Şifre Çözme (Decryption)
+                </div>
+                <div class="card-body p-4">
+                    <form action="/decrypt" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Şifreli Metin (Ciphertext):</label>
+                            <textarea class="form-control" name="encrypted_message" rows="3" placeholder="Çözmek istediğiniz hex kodu veya metni yapıştırın..." required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Kullanılan Metot:</label>
+                            <select class="form-select form-select-lg" name="algo">
+                                <option value="AES">AES-128</option>
+                                <option value="BLOWFISH">Blowfish</option>
+                                <option value="RSA">RSA</option>
+                                <option value="HILL">Hill Cipher</option>
+                                <option value="AFFINE">Affine</option>
+                                <option value="VIGENERE">Vigenere</option>
+                                <option value="SHIFT">Shift Cipher</option>
+                                <option value="CAESAR">Caesar</option>
+                                <option value="SUBSTITUTION">Substitution</option>
+                                <option value="DES">DES</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 mb-2">
+                            <i class="bi bi-key-fill"></i> ŞİFREYİ ÇÖZ
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
     {% if result %}
-    <div class="card mt-4 border-start border-5 border-{{ 'danger' if result.error else 'info' }}">
-        <div class="card-body">
-            <h5 class="fw-bold"><i class="bi bi-cpu"></i> İşlem Özeti ({{ result.mode }})</h5>
+    <div class="card mt-5 result-panel shadow-lg">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-4 d-flex align-items-center">
+                <i class="bi bi-cpu-fill text-info me-3"></i> 
+                İşlem Detayları 
+                <span class="badge bg-secondary ms-auto fs-6">{{ result.mode }}</span>
+            </h4>
             <hr>
             {% if result.error %}
-                <div class="alert alert-danger">{{ result.error }}</div>
+                <div class="alert alert-danger shadow-sm border-0 d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                    <div><strong>Hata:</strong> {{ result.error }}</div>
+                </div>
             {% else %}
-                <div class="row">
-                    <div class="col-sm-4"><strong>Kullanılan Metod:</strong></div>
-                    <div class="col-sm-8"><span class="badge bg-dark">{{ result.algo }}</span></div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-sm-4"><strong>İşlem Gören Veri:</strong></div>
-                    <div class="col-sm-8"><code>{{ result.encrypted }}</code></div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-sm-4 text-success h5"><strong>SONUÇ:</strong></div>
-                    <div class="col-sm-8 text-success h5 fw-bold">{{ result.decrypted }}</div>
+                <div class="row align-items-center">
+                    <div class="col-md-4 py-2 border-bottom">
+                        <span class="text-muted fw-bold">Algoritma:</span>
+                    </div>
+                    <div class="col-md-8 py-2 border-bottom">
+                        <span class="badge bg-dark px-3 py-2 fs-6">{{ result.algo }}</span>
+                    </div>
+                    
+                    <div class="col-md-4 py-3 border-bottom">
+                        <span class="text-muted fw-bold">Giriş Verisi:</span>
+                    </div>
+                    <div class="col-md-8 py-3 border-bottom">
+                        <code>{{ result.encrypted }}</code>
+                    </div>
+                    
+                    <div class="col-md-4 py-3 bg-light rounded-start">
+                        <span class="text-success fw-bold h5 mb-0">İşlem Sonucu:</span>
+                    </div>
+                    <div class="col-md-8 py-3 bg-light rounded-end text-success">
+                        <span class="h4 fw-bold mb-0">{{ result.decrypted }}</span>
+                    </div>
                 </div>
             {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
