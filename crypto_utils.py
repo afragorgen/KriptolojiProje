@@ -123,3 +123,51 @@ def substitution_decrypt(text, key_alphabet):
         if char in key_alphabet: result += ALPHABET[key_alphabet.index(char)]
         else: result += char
     return result
+
+# --- RAIL FENCE CIPHER ---
+def rail_fence_encrypt(text, rails=2):
+    # Çitleri oluştur
+    fence = [[] for _ in range(rails)]
+    rail = 0
+    direction = 1  # 1: aşağı, -1: yukarı
+
+    for char in text:
+        fence[rail].append(char)
+        rail += direction
+        if rail == 0 or rail == rails - 1:
+            direction *= -1
+            
+    return "".join(["".join(r) for r in fence])
+
+def rail_fence_decrypt(cipher, rails=2):
+    # Boş çit yapısını kur
+    fence = [['\n' for _ in range(len(cipher))] for _ in range(rails)]
+    rail = 0
+    direction = 1
+
+    # Harflerin nereye geleceğini işaretle
+    for i in range(len(cipher)):
+        fence[rail][i] = '*'
+        rail += direction
+        if rail == 0 or rail == rails - 1:
+            direction *= -1
+
+    # İşaretli yerlere şifreli metnin harflerini yerleştir
+    index = 0
+    for r in range(rails):
+        for c in range(len(cipher)):
+            if fence[r][c] == '*' and index < len(cipher):
+                fence[r][c] = cipher[index]
+                index += 1
+
+    # Zikzak çizerek oku
+    result = []
+    rail = 0
+    direction = 1
+    for i in range(len(cipher)):
+        result.append(fence[rail][i])
+        rail += direction
+        if rail == 0 or rail == rails - 1:
+            direction *= -1
+            
+    return "".join(result)

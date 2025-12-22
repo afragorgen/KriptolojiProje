@@ -117,6 +117,9 @@ def send():
             encrypted = enc_b.hex(); decrypted = unpad(c.decrypt(enc_b), DES.block_size).decode()
         elif algo == "SDES":
             encrypted = sdes_encrypt_text(msg); decrypted = "[Eğitim Amaçlı]"
+        elif algo == "RAILFENCE":
+            encrypted = rail_fence_encrypt(msg, 3)
+            decrypted = rail_fence_decrypt(encrypted, 3)
         
         res = {"algo": algo, "encrypted": encrypted, "decrypted": decrypted, "mode": "Şifreleme"}
     except Exception as e:
@@ -142,6 +145,8 @@ def decrypt_direct():
         elif algo == "DES":
             c = DES.new(DES_KEY, DES.MODE_ECB)
             decrypted = unpad(c.decrypt(bytes.fromhex(enc_text)), DES.block_size).decode()
+        elif algo == "RAILFENCE":
+            decrypted = rail_fence_decrypt(enc_text.upper(), 3)
         
         res = {"algo": algo, "encrypted": enc_text, "decrypted": decrypted, "mode": "Şifre Çözme"}
     except Exception as e:
