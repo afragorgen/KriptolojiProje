@@ -253,3 +253,137 @@ def route_encrypt(text, cols=4):
             left += 1
             
     return "".join(result)
+
+# --- PLAYFAIR CIPHER ---
+def prepare_playfair_key(key):
+    key = key.upper().replace("J", "I")
+    alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ" # J hariç
+    matrix = []
+    used = set()
+    
+    for char in key + alphabet:
+        if char not in used and char.isalpha():
+            matrix.append(char)
+            used.add(char)
+    
+    return [matrix[i:i+5] for i in range(0, 25, 5)]
+
+def find_position(matrix, char):
+    for r in range(5):
+        for c in range(5):
+            if matrix[r][c] == char:
+                return r, c
+    return None
+
+def playfair_encrypt(text, key="ANAHTAR"):
+    matrix = prepare_playfair_key(key)
+    text = text.upper().replace("J", "I").replace(" ", "")
+    
+    # İkili gruplar oluştur (Aynı harf yan yanaysa araya 'X' koy)
+    prepared_text = ""
+    i = 0
+    while i < len(text):
+        a = text[i]
+        b = text[i+1] if (i+1) < len(text) else 'X'
+        if a == b:
+            prepared_text += a + 'X'
+            i += 1
+        else:
+            prepared_text += a + b
+            i += 2
+    if len(prepared_text) % 2 != 0: prepared_text += 'X'
+
+    result = ""
+    for i in range(0, len(prepared_text), 2):
+        r1, c1 = find_position(matrix, prepared_text[i])
+        r2, c2 = find_position(matrix, prepared_text[i+1])
+        
+        if r1 == r2: # Aynı satır
+            result += matrix[r1][(c1+1)%5] + matrix[r2][(c2+1)%5]
+        elif c1 == c2: # Aynı sütun
+            result += matrix[(r1+1)%5][c1] + matrix[(r2+1)%5][c2]
+        else: # Dikdörtgen kuralı
+            result += matrix[r1][c2] + matrix[r2][c1]
+    return result
+
+def playfair_decrypt(cipher, key="ANAHTAR"):
+    matrix = prepare_playfair_key(key)
+    result = ""
+    for i in range(0, len(cipher), 2):
+        r1, c1 = find_position(matrix, cipher[i])
+        r2, c2 = find_position(matrix, cipher[i+1])
+        
+        if r1 == r2:
+            result += matrix[r1][(c1-1)%5] + matrix[r2][(c2-1)%5]
+        elif c1 == c2:
+            result += matrix[(r1-1)%5][c1] + matrix[(r2-1)%5][c2]
+        else:
+            result += matrix[r1][c2] + matrix[r2][c1]
+    return result
+
+# --- POLYBIUS SQUARE CIPHER ---
+def polybius_encrypt(text):
+    text = text.upper().replace("J", "I").replace(" ", "")
+    matrix = {
+        'A':'11', 'B':'12', 'C':'13', 'D':'14', 'E':'15',
+        'F':'21', 'G':'22', 'H':'23', 'I':'24', 'K':'25',
+        'L':'31', 'M':'32', 'N':'33', 'O':'34', 'P':'35',
+        'Q':'41', 'R':'42', 'S':'43', 'T':'44', 'U':'45',
+        'V':'51', 'W':'52', 'X':'53', 'Y':'54', 'Z':'55'
+    }
+    result = ""
+    for char in text:
+        if char in matrix:
+            result += matrix[char]
+    return result
+
+def polybius_decrypt(cipher):
+    # Sayı çiftlerini harfe geri döndür
+    reverse_matrix = {
+        '11':'A', '12':'B', '13':'C', '14':'D', '15':'E',
+        '21':'F', '22':'G', '23':'H', '24':'I', '25':'K',
+        '31':'L', '32':'M', '33':'N', '34':'O', '35':'P',
+        '41':'Q', '42':'R', '43':'S', '44':'T', '45':'U',
+        '51':'V', '52':'W', '53':'X', '54':'Y', '55':'Z'
+    }
+    result = ""
+    for i in range(0, len(cipher), 2):
+        pair = cipher[i:i+2]
+        if pair in reverse_matrix:
+            result += reverse_matrix[pair]
+    return result
+
+# --- PIGPEN CIPHER ---
+# Pigpen sembollerini temsil eden bir sözlük (Karakter -> Sembol Görünümü)
+PIGPEN_DICT = {
+    'A': '_|', 'B': '|_|', 'C': '|_',
+    'D': '[|', 'E': '[-|', 'F': '[_',
+    'G': '¯|', 'H': '|¯|', 'I': '|¯',
+    'J': '_.', 'K': '|._|', 'L': '._',
+    'M': '[.', 'N': '[-.]', 'O': '[._',
+    'P': '¯.', 'Q': '|¯.|', 'R': '|¯.',
+    'S': 'V',  'T': '>',   'U': '<',   'V': '^',
+    'W': 'V.', 'X': '>.',  'Y': '<.',  'Z': '^.'
+}
+
+def pigpen_encrypt(text):
+    text = text.upper().replace("İ", "I").replace("Ğ", "G").replace("Ü", "U").replace("Ş", "S").replace("Ö", "O").replace("Ç", "C")
+    result = []
+    for char in text:
+        if char in PIGPEN_DICT:
+            result.append(PIGPEN_DICT[char])
+        else:
+            result.append(char)
+    return "  ".join(result)
+
+def pigpen_decrypt(symbol_text):
+    # Sembollerden harfe geri dönüş
+    reverse_dict = {v: k for k, v in PIGPEN_DICT.items()}
+    symbols = symbol_text.split("  ")
+    result = ""
+    for s in symbols:
+        if s in reverse_dict:
+            result += reverse_dict[s]
+        else:
+            result += s
+    return result

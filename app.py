@@ -126,6 +126,15 @@ def send():
         elif algo == "ROUTE":
              encrypted = route_encrypt(msg, 4)
              decrypted = "[Çözme: Manuel Rota Takibi]"
+        elif algo == "PLAYFAIR":
+            encrypted = playfair_encrypt(msg, "ANAHTAR")
+            decrypted = playfair_decrypt(encrypted, "ANAHTAR")
+        elif algo == "POLYBIUS":
+            encrypted = polybius_encrypt(msg)
+            decrypted = polybius_decrypt(encrypted)
+        elif algo == "PIGPEN":
+            encrypted = pigpen_encrypt(msg)
+            decrypted = pigpen_decrypt(encrypted)
       
  
         
@@ -158,7 +167,13 @@ def decrypt_direct():
             decrypted = unpad(c.decrypt(bytes.fromhex(enc_text)), DES.block_size).decode()
         elif algo == "ROUTE":
             decrypted = "Spiral Rota ile Deşifre Edildi (Geliştirme Aşamasında)"
-            
+        elif algo == "PLAYFAIR":
+            decrypted = playfair_decrypt(enc_text.upper(), "ANAHTAR")
+        elif algo == "POLYBIUS":
+            decrypted = polybius_decrypt(enc_text)
+        elif algo == "PIGPEN":
+            decrypted = pigpen_decrypt(enc_text)
+
         res = {"algo": algo, "encrypted": enc_text, "decrypted": decrypted, "mode": "Şifre Çözme"}
     except Exception as e:
         res = {"algo": algo, "error": "Hata: Geçersiz format veya anahtar!"}
